@@ -13,14 +13,12 @@ import dash_bootstrap_components as dbc
 #Incio de Dash
 app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-#agregar linea de server para git
-server=app.server
-
 app.title="Dashboard Financiero"
 
 #Data a Usar
 df=pd.read_csv("empresas.csv")
 
+server=app.server
 sales_list=["Total Revenues","Cost of Revenues","Gross Profit","Total Operating Expenses","Operating Income",
             "Net Income","Shares Outstanding","Close Stock Price","Market Cap","Multiple of Revenue"]
 
@@ -34,14 +32,15 @@ app.layout = html.Div([
         
         #Html del primer dropdown para elegir las empresas que quiero ver en el dashboard.
         html.Div(dcc.Dropdown(
-            id="stockdropdown",value=["Amazon","Tesla","Microsoft","Apple","Google"],
-            clearable=False,multi=True,
-            options=[{"label":x,"value":x} for x in sorted(df.Company.unique())]),className="six columns",style={"width":"50%"}),
+            id="stockdropdown",value=["Amazon","Tesla","Microsoft","Apple","Google"],clearable=False,multi=True,
+            options=[{"label":x,"value":x} for x in sorted(df.Company.unique())]),
+            className="six columns",style={"width":"50%"}),
 
         #Html del segundo dropdown para elegir que variable numerica financiera quiero ver en el dashboard.
-        html.Div(dcc.Dropdown(
+            html.Div(dcc.Dropdown(
             id="numericdropdown",value="Total Revenues",clearable=False,
-            options=[{"label":x,"value":x} for x in sales_list]),className="six columns",style={"Width":"50%"})        
+            options=[{"label":x,"value":x} for x in sales_list]),className="six columns",
+            style={"width":"50%"})        
     ],className="row"),],className="custom-dropdown"),
 
     #Html de las graficas.
@@ -50,7 +49,7 @@ app.layout = html.Div([
 
     html.Div([dcc.Graph(id="boxplot",figure={})]),
 
-    html.Div(html.Div(id="table-container_1"),style={"marginBottom":"15px","marginTop":"0px"}),    
+    html.Div(html.Div(id="table-container"),style={"marginBottom":"15px","marginTop":"0px"}),    
 ])
 
 #Callback para actualizar la grafica y la tabla.
@@ -58,15 +57,13 @@ app.layout = html.Div([
 @app.callback(
 
     #Output con todo lo que devuelve el app: las 2 graficas actualizadas en modo figure y la tabla.
-    [Output("bar","figure"),Output("boxplot","figure"),Output("table-container_1","children")],
-    [Input("stockdropdown","value"),Input("numericdropdown","value")]
-)
+    [Output("bar","figure"),Output("boxplot","figure"),Output("table-container","children")],
+    [Input("stockdropdown","value"),Input("numericdropdown","value")])
 
 #Definicion para armar las graficas y la tabla.
 
 def display_value(selected_stock,selected_numeric):
-    #if len(selected_stock)==0:
-    if not selected_stock:
+    if len(selected_stock)==0:
         dfv_fltrd=df[df["Company"].isin(["Amazon","Tesla","Microsoft","Apple","Google"])]
     else:
         dfv_fltrd=df[df["Company"].isin(selected_stock)]
@@ -86,7 +83,7 @@ def display_value(selected_stock,selected_numeric):
     fig2.update_layout(title=f"{selected_numeric} de {selected_stock}")
 
     #modificar el dataframe para opder hacerlo una tabla 
-    df_reshaped = dfv_fltrd.pivot(index="Company",columns="Quarter",value=selected_numeric)
+    df_reshaped = dfv_fltrd.pivot(index="Company",columns="Quarter",values=selected_numeric)
     df_reshaped2 = df_reshaped.reset_index()
 
     #forma en que despliega la tabla
@@ -103,4 +100,4 @@ def display_value(selected_stock,selected_numeric):
                                                      "color":"black"}]))
     #Set server y correr el app
 if __name__=="__main__":
-     app.run_server(debug=False,host="0.0.0.0"port=10000)
+     app.run_server(debug=False, host="0.0.0.0", port=10000)
