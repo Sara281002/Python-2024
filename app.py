@@ -19,7 +19,7 @@ server=app.server
 app.title="Dashboard Financiero"
 
 #Data a Usar
-df=pd.read_csv("C:/Users/sarai/OneDrive/Escritorio/Octavo Semestre/Python for Finance/empresas.csv")
+df=pd.read_csv("empresas.csv")
 
 sales_list=["Total Revenues","Cost of Revenues","Gross Profit","Total Operating Expenses","Operating Income",
             "Net Income","Shares Outstanding","Close Stock Price","Market Cap","Multiple of Revenue"]
